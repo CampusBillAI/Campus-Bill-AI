@@ -1,12 +1,33 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import csv
 
 app = Flask(__name__)
+CORS(app)
+
+
+# 消费类型关键词
+FOOD_KEYWORDS = ['餐', '饭', '食堂', '外卖', '奶茶', '超市']
+SHOPPING_KEYWORDS = ['淘宝', '京东', '拼多多', '购物']
+
+
+def classify_expense(product_name):
+    """根据商品名判断消费类型：food / shopping / fun"""
+    for kw in FOOD_KEYWORDS:
+        if kw in product_name:
+            return 'food'
+    for kw in SHOPPING_KEYWORDS:
+        if kw in product_name:
+            return 'shopping'
+    return 'fun'
 
 
 @app.route('/')
 def get_bill_data():
     daily_expense = {}
+    food_expense = {}
+    shopping_expense = {}
+    fun_expense = {}
     total_expense = 0.0
 
     try:
@@ -39,6 +60,15 @@ def get_bill_data():
                             daily_expense[date_str] += amount
                         else:
                             daily_expense[date_str] = amount
+
+                        # 从"商品"列（索引 3）提取关键词并分类
+                        category = classify_expense(row[3].strip())
+                        if category == 'food':
+                            food_expense[date_str] = food_expense.get(date_str, 0) + amount
+                        elif category == 'shopping':
+                            shopping_expense[date_str] = shopping_expense.get(date_str, 0) + amount
+                        else:
+                            fun_expense[date_str] = fun_expense.get(date_str, 0) + amount
                     except ValueError:
                         continue
 
@@ -46,7 +76,10 @@ def get_bill_data():
         return jsonify({
             "status": "success",
             "total_expense": round(total_expense, 2),
-            "daily_expense": dict(sorted(daily_expense.items()))
+            "daily_expense": dict(sorted(daily_expense.items())),
+            "food_expense": dict(sorted(food_expense.items())),
+            "shopping_expense": dict(sorted(shopping_expense.items())),
+            "fun_expense": dict(sorted(fun_expense.items()))
         })
 
     except FileNotFoundError:
