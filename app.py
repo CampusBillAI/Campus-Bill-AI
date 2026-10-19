@@ -1,23 +1,25 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import csv
+import os
+import sqlite3
 
 app = Flask(__name__)
 CORS(app)
 
+DB_FILE = 'bill.db'
 
-# 消费类型关键词
+# 消费类型关键词（按商户名匹配）
 FOOD_KEYWORDS = ['餐', '饭', '食堂', '外卖', '奶茶', '超市']
 SHOPPING_KEYWORDS = ['淘宝', '京东', '拼多多', '购物']
 
 
-def classify_expense(product_name):
-    """根据商品名判断消费类型：food / shopping / fun"""
+def classify_expense(merchant):
+    """根据商户名判断消费类型：food / shopping / fun"""
     for kw in FOOD_KEYWORDS:
-        if kw in product_name:
+        if kw in merchant:
             return 'food'
     for kw in SHOPPING_KEYWORDS:
-        if kw in product_name:
+        if kw in merchant:
             return 'shopping'
     return 'fun'
 
@@ -31,48 +33,34 @@ def get_bill_data():
     total_expense = 0.0
 
     try:
-        # 读取账单 CSV，注意编码
-        with open('bill.csv', 'r', encoding='gbk') as f:
-            reader = csv.reader(f)
+        if not os.path.exists(DB_FILE):
+            return jsonify({"status": "error", "message": "找不到 bill.db，请先运行 import_csv.py 导入数据"}), 404
 
-            # 跳过前 17 行说明文字
-            for i in range(17):
-                next(reader)
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT date, merchant, amount FROM bills WHERE type = '支出'")
+        rows = cursor.fetchall()
+        conn.close()
 
-            for row in reader:
-                if len(row) < 6:
-                    continue
+        for date, merchant, amount in rows:
+            total_expense += amount
 
-                # 提取"收/支"列（昨天改成功的 row[4]）
-                trade_type = row[4].strip()
+            # 按日期累加
+            if date in daily_expense:
+                daily_expense[date] += amount
+            else:
+                daily_expense[date] = amount
 
-                # 提取"金额"列，去掉符号
-                amount_str = row[5].strip().replace('¥', '').replace('￥', '')
+            # 按商户名分类后按日期累加
+            category = classify_expense(merchant or '')
+            if category == 'food':
+                food_expense[date] = food_expense.get(date, 0) + amount
+            elif category == 'shopping':
+                shopping_expense[date] = shopping_expense.get(date, 0) + amount
+            else:
+                fun_expense[date] = fun_expense.get(date, 0) + amount
 
-                if trade_type == '支出':
-                    try:
-                        amount = float(amount_str)
-                        total_expense += amount
-
-                        # 提取日期部分
-                        date_str = row[0].strip().split(' ')[0]
-                        if date_str in daily_expense:
-                            daily_expense[date_str] += amount
-                        else:
-                            daily_expense[date_str] = amount
-
-                        # 从"商品"列（索引 3）提取关键词并分类
-                        category = classify_expense(row[3].strip())
-                        if category == 'food':
-                            food_expense[date_str] = food_expense.get(date_str, 0) + amount
-                        elif category == 'shopping':
-                            shopping_expense[date_str] = shopping_expense.get(date_str, 0) + amount
-                        else:
-                            fun_expense[date_str] = fun_expense.get(date_str, 0) + amount
-                    except ValueError:
-                        continue
-
-        # 把整理好的数据打包返回
+        # 把整理好的数据打包返回（字段名与之前完全一致，前端无需改动）
         return jsonify({
             "status": "success",
             "total_expense": round(total_expense, 2),
@@ -82,8 +70,8 @@ def get_bill_data():
             "fun_expense": dict(sorted(fun_expense.items()))
         })
 
-    except FileNotFoundError:
-        return jsonify({"status": "error", "message": "找不到 bill.csv 文件，请确认文件在项目根目录"}), 404
+    except sqlite3.Error as e:
+        return jsonify({"status": "error", "message": f"数据库读取失败: {e}"}), 500
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
