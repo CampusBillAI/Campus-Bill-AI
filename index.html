@@ -189,14 +189,221 @@
             letter-spacing: 2px;
             z-index: 5;
         }
+
+        /* ============ 头部上传按钮 ============ */
+        .upload-btn {
+            position: absolute;
+            right: 260px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #bfe6ff;
+            background: linear-gradient(135deg, rgba(0, 180, 255, 0.2), rgba(0, 100, 200, 0.25));
+            border: 1px solid rgba(0, 212, 255, 0.55);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.15), inset 0 0 10px rgba(0, 212, 255, 0.08);
+            overflow: hidden;
+        }
+        .upload-btn:hover {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(0, 180, 255, 0.45), rgba(0, 100, 200, 0.5));
+            border-color: #00d4ff;
+            box-shadow: 0 0 22px rgba(0, 212, 255, 0.5), inset 0 0 18px rgba(0, 212, 255, 0.2);
+            transform: translateY(-50%) translateY(-1px);
+        }
+        .upload-btn:active {
+            transform: translateY(-50%) translateY(1px);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 8px rgba(0, 212, 255, 0.15);
+        }
+        .upload-btn .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+        .upload-btn:disabled, .upload-btn.is-loading {
+            cursor: not-allowed;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+        .upload-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            animation: none;
+        }
+        .upload-btn.is-loading::after {
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer {
+            0%   { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* ============ 全局 Toast 提示 ============ */
+        .toast-container {
+            position: fixed;
+            top: 8vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 22px;
+            border-radius: 4px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            min-width: 200px;
+            justify-content: center;
+            border: 1px solid;
+            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease;
+        }
+        .toast.toast-info {
+            color: #bfe6ff;
+            background: linear-gradient(135deg, rgba(0, 80, 160, 0.85), rgba(0, 40, 90, 0.9));
+            border-color: rgba(0, 180, 255, 0.6);
+        }
+        .toast.toast-success {
+            color: #c6ffe5;
+            background: linear-gradient(135deg, rgba(20, 120, 80, 0.85), rgba(10, 60, 40, 0.9));
+            border-color: rgba(0, 230, 140, 0.6);
+        }
+        .toast.toast-error {
+            color: #ffd5d5;
+            background: linear-gradient(135deg, rgba(150, 30, 30, 0.85), rgba(80, 15, 15, 0.9));
+            border-color: rgba(255, 90, 90, 0.6);
+        }
+        .toast.is-leaving {
+            animation: toastOut 0.3s ease forwards;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-16px); }
+        }
+        .toast .toast-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ============ 最近上传记录面板 ============ */
+        .recent-panel {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(16, 42, 88, 0.8), rgba(8, 20, 48, 0.85));
+            border: 1px solid rgba(64, 158, 255, 0.35);
+            box-shadow: inset 0 0 20px rgba(0, 120, 220, 0.1);
+            padding: 8px 12px 10px;
+        }
+        .recent-panel h3 {
+            font-size: 14px;
+            color: #9fd8ff;
+            letter-spacing: 2px;
+            font-weight: 600;
+            padding-left: 10px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+        .recent-panel h3::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 13px;
+            background: linear-gradient(180deg, #00d4ff, #1e6dff);
+            box-shadow: 0 0 6px #00d4ff;
+        }
+        #recentList { list-style: none; }
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 6px;
+            font-size: 12.5px;
+            color: #bfe6ff;
+            border-bottom: 1px dashed rgba(64, 158, 255, 0.15);
+        }
+        .recent-item:last-child { border-bottom: none; }
+        .recent-item:hover { background: rgba(0, 150, 255, 0.08); }
+        .recent-date { color: #5a8fc0; flex: none; }
+        .recent-merchant {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .recent-amount { color: #ffd34e; flex: none; }
+        .recent-del {
+            flex: none;
+            padding: 2px 10px;
+            font-size: 12px;
+            color: #ff9a9a;
+            background: transparent;
+            border: 1px solid rgba(255, 120, 120, 0.45);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .recent-del:hover {
+            color: #fff;
+            background: rgba(255, 80, 80, 0.25);
+            border-color: #ff7070;
+            box-shadow: 0 0 8px rgba(255, 90, 90, 0.35);
+        }
+        .recent-del:disabled { opacity: 0.5; cursor: not-allowed; }
+        .recent-empty {
+            text-align: center;
+            color: #5a8fc0;
+            font-size: 12px;
+            padding: 8px 0;
+        }
     </style>
 </head>
 <body>
     <!-- 头部 -->
     <header>
         <h1>吃土账单分析 · 数据大屏</h1>
+        <button id="uploadBtn" class="upload-btn" title="上传账单截图">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            上传截图
+        </button>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
         <div class="show-time"></div>
     </header>
+
+    <!-- 全局 Toast 容器 -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <!-- 页面主体 -->
     <section class="mainbox">
@@ -221,6 +428,11 @@
                 <div class="main">我的钱都去哪了</div>
                 <div class="sub">PERSONAL EXPENSE DASHBOARD</div>
             </div>
+            <!-- 最近上传记录 -->
+            <div class="recent-panel">
+                <h3>最近上传记录</h3>
+                <ul id="recentList"></ul>
+            </div>
         </div>
 
         <!-- 右侧：总支出 + 环饼图 -->
@@ -231,7 +443,7 @@
                 <div>
                     <span id="totalNumber" class="total-number">--</span><span class="total-unit">元</span>
                 </div>
-                <div class="total-tip">数据来源：bill.csv · 共统计 <b id="dayCount">--</b> 天</div>
+                <div class="total-tip">数据来源：SQLite数据库</div>
             </div>
             <div class="panel">
                 <span class="corner-tl"></span><span class="corner-br"></span>
@@ -282,140 +494,285 @@
             })();
         }
 
-        /* ================= 拉取后端数据并渲染 ================= */
-        fetch('http://127.0.0.1:5000/')
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                if (data.status !== 'success') throw new Error(data.message || '后端返回异常');
+        /* ================= Toast 辅助函数 ================= */
+        var toastContainer = document.getElementById('toastContainer');
+        function showToast(message, type, duration, showSpinner) {
+            type = type || 'info';
+            duration = duration || 3000;
+            var el = document.createElement('div');
+            el.className = 'toast toast-' + type;
+            var spinnerHtml = showSpinner ? '<div class="toast-spinner"></div>' : '';
+            el.innerHTML = spinnerHtml + '<span>' + message + '</span>';
+            toastContainer.appendChild(el);
+            var closed = false;
+            function close() {
+                if (closed) return;
+                closed = true;
+                el.classList.add('is-leaving');
+                setTimeout(function () { el.remove(); }, 300);
+            }
+            if (duration > 0) setTimeout(close, duration);
+            return { close: close };
+        }
 
-                // ---- 各分类汇总金额 ----
-                var totals = CATEGORIES.map(function (c) {
-                    return { name: c.name, value: Math.round(sumDict(data[c.key]) * 100) / 100, color: c.color };
-                });
-
-                // ---- 总支出大数字 ----
-                countUp(document.getElementById('totalNumber'), data.total_expense || 0);
-                document.getElementById('dayCount').textContent = Object.keys(data.daily_expense || {}).length;
-
-                /* ---------- 左上：分类柱形图 ---------- */
-                barChart.setOption({
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
-                        valueFormatter: function (v) { return v + ' 元'; } },
-                    grid: { left: '8%', right: '6%', top: '12%', bottom: '10%' },
-                    xAxis: {
-                        type: 'category',
-                        data: totals.map(function (t) { return t.name; }),
-                        axisLine: { lineStyle: { color: '#2b5a8f' } },
-                        axisTick: { show: false },
-                        axisLabel: { color: '#9fd8ff', fontSize: 14 }
-                    },
-                    yAxis: {
-                        type: 'value',
-                        name: '元',
-                        nameTextStyle: { color: '#5a8fc0' },
-                        splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
-                        axisLabel: { color: '#5a8fc0' }
-                    },
-                    series: [{
-                        type: 'bar',
-                        barWidth: '42%',
-                        data: totals.map(function (t) {
-                            return {
-                                value: t.value,
-                                itemStyle: {
-                                    borderRadius: [6, 6, 0, 0],
-                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                        { offset: 0, color: t.color },
-                                        { offset: 1, color: 'rgba(10,40,90,0.3)' }
-                                    ]),
-                                    shadowColor: t.color,
-                                    shadowBlur: 14
-                                }
-                            };
-                        }),
-                        label: { show: true, position: 'top', color: '#c9e8ff',
-                            formatter: function (p) { return p.value + ' 元'; } }
-                    }]
-                });
-
-                /* ---------- 左下：每日消费趋势折线图 ---------- */
-                var daily = data.daily_expense || {};
-                var dates = Object.keys(daily).sort();
-                var shortDates = dates.map(function (d) { return d.length >= 10 ? d.substring(5) : d; });
-                var values = dates.map(function (d) { return Math.round(daily[d] * 100) / 100; });
-
-                lineChart.setOption({
-                    tooltip: { trigger: 'axis',
-                        valueFormatter: function (v) { return v + ' 元'; } },
-                    grid: { left: '9%', right: '5%', top: '14%', bottom: '12%' },
-                    xAxis: {
-                        type: 'category',
-                        boundaryGap: false,
-                        data: shortDates,
-                        axisLine: { lineStyle: { color: '#2b5a8f' } },
-                        axisLabel: { color: '#5a8fc0', fontSize: 11, rotate: dates.length > 10 ? 35 : 0 }
-                    },
-                    yAxis: {
-                        type: 'value',
-                        name: '元',
-                        nameTextStyle: { color: '#5a8fc0' },
-                        splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
-                        axisLabel: { color: '#5a8fc0' }
-                    },
-                    series: [{
-                        type: 'line',
-                        smooth: true,
-                        symbol: 'circle',
-                        symbolSize: 7,
-                        data: values,
-                        itemStyle: { color: '#00d4ff' },
-                        lineStyle: { width: 2.5, color: '#00d4ff', shadowColor: '#00d4ff', shadowBlur: 10 },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(0,212,255,0.45)' },
-                                { offset: 1, color: 'rgba(0,212,255,0.02)' }
-                            ])
-                        }
-                    }]
-                });
-
-                /* ---------- 右下：消费占比环饼图 ---------- */
-                pieChart.setOption({
-                    tooltip: { trigger: 'item',
-                        formatter: function (p) { return p.name + '：' + p.value + ' 元 (' + p.percent + '%)'; } },
-                    legend: { bottom: '2%', left: 'center',
-                        textStyle: { color: '#9fd8ff' }, itemWidth: 12, itemHeight: 12 },
-                    color: totals.map(function (t) { return t.color; }),
-                    series: [{
-                        type: 'pie',
-                        radius: ['42%', '66%'],
-                        center: ['50%', '46%'],
-                        avoidLabelOverlap: true,
-                        itemStyle: { borderColor: '#050b1f', borderWidth: 2 },
-                        label: { color: '#c9e8ff', formatter: '{b}\n{d}%', fontSize: 12 },
-                        labelLine: { lineStyle: { color: '#3a7bb5' } },
-                        emphasis: {
-                            scaleSize: 8,
-                            label: { fontSize: 15, fontWeight: 'bold' },
-                            itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,212,255,0.5)' }
-                        },
-                        data: totals.map(function (t) { return { name: t.name, value: t.value }; })
-                    }]
-                });
-            })
-            .catch(function (err) {
-                document.getElementById('totalNumber').textContent = '0.00';
-                document.getElementById('dayCount').textContent = '0';
-                var tip = '连接后端失败：请确认 app.py 已启动 (http://127.0.0.1:5000)';
-                ['barChart', 'lineChart', 'pieChart'].forEach(function (id) {
-                    var dom = document.getElementById(id);
-                    var d = document.createElement('div');
-                    d.className = 'loading';
-                    d.textContent = tip;
-                    dom.appendChild(d);
-                });
-                console.error(err);
+        /* ================= 统一渲染函数 ================= */
+        function renderAll(data) {
+            // 清除之前可能追加的 loading 层
+            ['barChart', 'lineChart', 'pieChart'].forEach(function (id) {
+                var dom = document.getElementById(id);
+                dom.querySelectorAll('.loading').forEach(function (n) { n.remove(); });
             });
+
+            var totals = CATEGORIES.map(function (c) {
+                return { name: c.name, value: Math.round(sumDict(data[c.key]) * 100) / 100, color: c.color };
+            });
+
+            countUp(document.getElementById('totalNumber'), data.total_expense || 0);
+
+            /* ---------- 左上：分类柱形图 ---------- */
+            barChart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+                    valueFormatter: function (v) { return v + ' 元'; } },
+                grid: { left: '8%', right: '6%', top: '12%', bottom: '10%' },
+                xAxis: {
+                    type: 'category',
+                    data: totals.map(function (t) { return t.name; }),
+                    axisLine: { lineStyle: { color: '#2b5a8f' } },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#9fd8ff', fontSize: 14 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '元',
+                    nameTextStyle: { color: '#5a8fc0' },
+                    splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
+                    axisLabel: { color: '#5a8fc0' }
+                },
+                series: [{
+                    type: 'bar',
+                    barWidth: '42%',
+                    data: totals.map(function (t) {
+                        return {
+                            value: t.value,
+                            itemStyle: {
+                                borderRadius: [6, 6, 0, 0],
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: t.color },
+                                    { offset: 1, color: 'rgba(10,40,90,0.3)' }
+                                ]),
+                                shadowColor: t.color,
+                                shadowBlur: 14
+                            }
+                        };
+                    }),
+                    label: { show: true, position: 'top', color: '#c9e8ff',
+                        formatter: function (p) { return p.value + ' 元'; } }
+                }]
+            }, true);
+
+            /* ---------- 左下：每日消费趋势折线图 ---------- */
+            var daily = data.daily_expense || {};
+            var dates = Object.keys(daily).sort();
+            var shortDates = dates.map(function (d) { return d.length >= 10 ? d.substring(5) : d; });
+            var values = dates.map(function (d) { return Math.round(daily[d] * 100) / 100; });
+
+            lineChart.setOption({
+                tooltip: { trigger: 'axis',
+                    valueFormatter: function (v) { return v + ' 元'; } },
+                grid: { left: '9%', right: '5%', top: '14%', bottom: '12%' },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: shortDates,
+                    axisLine: { lineStyle: { color: '#2b5a8f' } },
+                    axisLabel: { color: '#5a8fc0', fontSize: 11, rotate: dates.length > 10 ? 35 : 0 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '元',
+                    nameTextStyle: { color: '#5a8fc0' },
+                    splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
+                    axisLabel: { color: '#5a8fc0' }
+                },
+                series: [{
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 7,
+                    data: values,
+                    itemStyle: { color: '#00d4ff' },
+                    lineStyle: { width: 2.5, color: '#00d4ff', shadowColor: '#00d4ff', shadowBlur: 10 },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(0,212,255,0.45)' },
+                            { offset: 1, color: 'rgba(0,212,255,0.02)' }
+                        ])
+                    }
+                }]
+            }, true);
+
+            /* ---------- 右下：消费占比环饼图 ---------- */
+            pieChart.setOption({
+                tooltip: { trigger: 'item',
+                    formatter: function (p) { return p.name + '：' + p.value + ' 元 (' + p.percent + '%)'; } },
+                legend: { bottom: '2%', left: 'center',
+                    textStyle: { color: '#9fd8ff' }, itemWidth: 12, itemHeight: 12 },
+                color: totals.map(function (t) { return t.color; }),
+                series: [{
+                    type: 'pie',
+                    radius: ['42%', '66%'],
+                    center: ['50%', '46%'],
+                    avoidLabelOverlap: true,
+                    itemStyle: { borderColor: '#050b1f', borderWidth: 2 },
+                    label: { color: '#c9e8ff', formatter: '{b}\n{d}%', fontSize: 12 },
+                    labelLine: { lineStyle: { color: '#3a7bb5' } },
+                    emphasis: {
+                        scaleSize: 8,
+                        label: { fontSize: 15, fontWeight: 'bold' },
+                        itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,212,255,0.5)' }
+                    },
+                    data: totals.map(function (t) { return { name: t.name, value: t.value }; })
+                }]
+            }, true);
+        }
+
+        /* ================= 拉取并渲染 ================= */
+        function refreshData() {
+            return fetch('http://127.0.0.1:5000/')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status !== 'success') throw new Error(data.message || '后端返回异常');
+                    renderAll(data);
+                    return data;
+                })
+                .catch(function (err) {
+                    document.getElementById('totalNumber').textContent = '0.00';
+                    var tip = '连接后端失败：请确认 app.py 已启动 (http://127.0.0.1:5000)';
+                    ['barChart', 'lineChart', 'pieChart'].forEach(function (id) {
+                        var dom = document.getElementById(id);
+                        var d = document.createElement('div');
+                        d.className = 'loading';
+                        d.textContent = tip;
+                        dom.appendChild(d);
+                    });
+                    console.error(err);
+                    throw err;
+                });
+        }
+
+        // 首次加载
+        refreshData().catch(function () {});
+        fetchRecent();
+
+        /* ================= 最近上传记录列表 ================= */
+        function escapeHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function fetchRecent() {
+            return fetch('http://127.0.0.1:5000/api/recent')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status !== 'success') return;
+                    var ul = document.getElementById('recentList');
+                    if (!data.items || data.items.length === 0) {
+                        ul.innerHTML = '<li class="recent-empty">暂无记录</li>';
+                        return;
+                    }
+                    var html = '';
+                    data.items.forEach(function (it) {
+                        html += '<li class="recent-item">'
+                            + '<span class="recent-date">' + escapeHtml(it.date) + '</span>'
+                            + '<span class="recent-merchant" title="' + escapeHtml(it.merchant) + '">' + escapeHtml(it.merchant) + '</span>'
+                            + '<span class="recent-amount">¥' + Number(it.amount).toFixed(2) + '</span>'
+                            + '<button class="recent-del" data-id="' + it.id + '">删除</button>'
+                            + '</li>';
+                    });
+                    ul.innerHTML = html;
+                })
+                .catch(function (err) { console.error(err); });
+        }
+
+        // 删除按钮（事件委托）
+        document.getElementById('recentList').addEventListener('click', function (e) {
+            var btn = e.target.closest('.recent-del');
+            if (!btn || btn.disabled) return;
+            btn.disabled = true;
+            btn.textContent = '删除中...';
+
+            fetch('http://127.0.0.1:5000/api/bills/' + btn.dataset.id, { method: 'DELETE' })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status !== 'success') throw new Error(data.message || '删除失败');
+                    showToast('已删除', 'success', 1800);
+                    refreshData().catch(function () {});  // 刷新大屏图表
+                    fetchRecent();                         // 刷新列表
+                })
+                .catch(function (err) {
+                    showToast('删除失败：' + err.message, 'error', 3000);
+                    btn.disabled = false;
+                    btn.textContent = '删除';
+                });
+        });
+
+        /* ================= 上传截图流程 ================= */
+        var uploadBtn = document.getElementById('uploadBtn');
+        var fileInput = document.getElementById('fileInput');
+        var UPLOAD_URL = 'http://127.0.0.1:5000/api/upload';
+
+        uploadBtn.addEventListener('click', function () {
+            fileInput.value = '';   // 允许重新选同一文件
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function () {
+            var file = fileInput.files[0];
+            if (!file) return;
+
+            // 前端格式兜底
+            var okTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            var ext = (file.name.split('.').pop() || '').toLowerCase();
+            if (okTypes.indexOf(file.type) === -1 && ['png', 'jpg', 'jpeg', 'webp'].indexOf(ext) === -1) {
+                showToast('只支持 PNG / JPG / JPEG / WEBP 格式', 'error', 3000);
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('图片太大，请控制在 10MB 以内', 'error', 3000);
+                return;
+            }
+
+            // 按钮进入 loading 状态
+            uploadBtn.classList.add('is-loading');
+            uploadBtn.disabled = true;
+
+            // 显示"AI 正在提取账单数据"提示
+            var loadingToast = showToast('AI 正在提取账单数据，请稍候...', 'info', 0, true);
+
+            var form = new FormData();
+            form.append('file', file);
+
+            fetch(UPLOAD_URL, { method: 'POST', body: form })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    loadingToast.close();
+                    if (data.status !== 'success') throw new Error(data.message || '识别失败');
+
+                    showToast('识别成功！正在刷新大屏...', 'success', 2200);
+                    fetchRecent();          // 同步刷新最近上传列表
+                    return refreshData();
+                })
+                .catch(function (err) {
+                    loadingToast.close();
+                    var msg = err.message || '上传失败，请重试';
+                    showToast(msg, 'error', 3800);
+                    console.error(err);
+                })
+                .then(function () {
+                    uploadBtn.classList.remove('is-loading');
+                    uploadBtn.disabled = false;
+                });
+        });
 
         // 自适应窗口
         window.addEventListener('resize', function () {
