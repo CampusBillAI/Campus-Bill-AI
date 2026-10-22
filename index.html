@@ -6,31 +6,79 @@
     <title>吃土账单分析 · 数据大屏</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
+        /* ============ 设计令牌 ============ */
+        :root {
+            --bg-0: #050b1f;
+            --bg-1: rgba(16, 42, 88, 0.55);
+            --bg-2: rgba(8, 20, 48, 0.65);
+            --line: rgba(64, 158, 255, 0.28);
+            --line-strong: rgba(0, 212, 255, 0.55);
+            --accent: #00d4ff;
+            --accent-2: #1e6dff;
+            --text-1: #e6f4ff;
+            --text-2: #bfe6ff;
+            --text-3: #7fb8e6;
+            --text-4: #5a8fc0;
+            --warn: #ffd34e;
+            --danger: #ff7070;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --space-1: 6px;
+            --space-2: 10px;
+            --space-3: 16px;
+            --header-h: 72px;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-            color: #c9e8ff;
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            color: var(--text-2);
             background:
                 radial-gradient(ellipse at 50% 120%, rgba(0, 80, 160, 0.35), transparent 60%),
                 radial-gradient(ellipse at 50% -20%, rgba(0, 120, 200, 0.25), transparent 55%),
-                #050b1f;
+                var(--bg-0);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection { background: rgba(0, 212, 255, 0.35); color: #fff; }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
         }
 
         /* ============ 头部 ============ */
         header {
             position: relative;
-            height: 8vh;
+            height: var(--header-h);
             min-height: 56px;
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
             align-items: center;
-            justify-content: center;
+            gap: var(--space-3);
+            padding: 0 24px;
             background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='80'><path d='M0 78 L300 78 L340 20 L860 20 L900 78 L1200 78' fill='none' stroke='%231e90ff' stroke-width='1.5' opacity='0.5'/></svg>") center bottom / 100% 100% no-repeat;
         }
+        .header-left {
+            justify-self: start;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
         header h1 {
+            justify-self: center;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             font-size: 30px;
             font-weight: 700;
             letter-spacing: 6px;
@@ -39,28 +87,29 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 24px rgba(0, 180, 255, 0.35);
+            transition: font-size 0.2s var(--ease), letter-spacing 0.2s var(--ease);
         }
         .show-time {
-            position: absolute;
-            right: 24px;
-            top: 50%;
-            transform: translateY(-50%);
+            justify-self: end;
+            text-align: right;
             font-size: 14px;
-            color: #7fb8e6;
+            color: var(--text-3);
+            font-variant-numeric: tabular-nums;
         }
 
         /* ============ 主体布局 ============ */
         .mainbox {
-            height: 92vh;
+            height: calc(100vh - var(--header-h));
             display: grid;
-            grid-template-columns: 1fr 1.35fr 1fr;
-            gap: 16px;
-            padding: 12px 16px 16px;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
+            gap: var(--space-3);
+            padding: 8px 16px 16px;
         }
         .column {
             display: grid;
-            gap: 16px;
+            gap: var(--space-3);
             min-height: 0;
+            min-width: 0;
         }
         .column.left  { grid-template-rows: 1fr 1fr; }
         .column.right { grid-template-rows: 0.85fr 1.15fr; }
@@ -69,13 +118,20 @@
         /* ============ 卡片（带科技感四角） ============ */
         .panel {
             position: relative;
-            background: linear-gradient(180deg, rgba(16, 42, 88, 0.55), rgba(8, 20, 48, 0.65));
-            border: 1px solid rgba(64, 158, 255, 0.35);
-            box-shadow: inset 0 0 30px rgba(0, 120, 220, 0.12);
-            padding: 10px 14px 14px;
+            background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: inset 0 0 30px rgba(0, 120, 220, 0.12), 0 8px 24px rgba(0, 0, 0, 0.25);
+            padding: 12px 14px 14px;
             display: flex;
             flex-direction: column;
             min-height: 0;
+            min-width: 0;
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+        }
+        .panel:hover {
+            border-color: rgba(0, 212, 255, 0.45);
+            box-shadow: inset 0 0 30px rgba(0, 140, 255, 0.16), 0 8px 28px rgba(0, 0, 0, 0.3);
         }
         .panel::before, .panel::after,
         .panel .corner-tl, .panel .corner-br {
@@ -83,19 +139,19 @@
             position: absolute;
             width: 14px;
             height: 14px;
-            border-color: #00d4ff;
+            border-color: var(--accent);
             border-style: solid;
         }
-        .panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-        .panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-        .panel .corner-tl { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
-        .panel .corner-br { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-top-left-radius: var(--radius-lg); }
+        .panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-bottom-right-radius: var(--radius-lg); }
+        .panel .corner-tl { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-top-right-radius: var(--radius-lg); }
+        .panel .corner-br { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-bottom-left-radius: var(--radius-lg); }
 
         .panel h2 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             letter-spacing: 2px;
-            color: #9fd8ff;
+            color: var(--text-2);
             padding-left: 12px;
             margin-bottom: 6px;
             position: relative;
@@ -107,10 +163,11 @@
             left: 0; top: 50%;
             transform: translateY(-50%);
             width: 4px; height: 16px;
-            background: linear-gradient(180deg, #00d4ff, #1e6dff);
-            box-shadow: 0 0 8px #00d4ff;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+            box-shadow: 0 0 8px var(--accent);
         }
-        .chart { flex: 1; min-height: 0; }
+        .chart { flex: 1; min-height: 0; position: relative; }
 
         /* ============ 中间 3D 地球 ============ */
         #globe {
@@ -177,57 +234,184 @@
         }
         .total-tip b { color: #ff8a8a; }
 
-        /* ============ 加载 / 错误提示 ============ */
+        /* ============ 加载 / 错误 / 空状态 ============ */
         .loading {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #5a8fc0;
-            font-size: 14px;
-            letter-spacing: 2px;
+            gap: 10px;
+            padding: 0 12px;
+            text-align: center;
+            color: var(--text-4);
+            font-size: 13px;
+            letter-spacing: 1px;
             z-index: 5;
+            background: rgba(5, 11, 31, 0.55);
+            backdrop-filter: blur(2px);
+        }
+        .loading::before {
+            content: "";
+            width: 14px;
+            height: 14px;
+            flex: none;
+            border: 2px solid var(--text-4);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        .loading.is-error { color: #ff9a9a; }
+        .loading.is-error::before { display: none; }
+
+        /* ============ 最近上传记录面板 ============ */
+        .recent-panel {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(16, 42, 88, 0.82), rgba(8, 20, 48, 0.9));
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: inset 0 0 20px rgba(0, 120, 220, 0.1), 0 8px 24px rgba(0, 0, 0, 0.3);
+            padding: 10px 12px 10px;
+            backdrop-filter: blur(6px);
+        }
+        .recent-panel h3 {
+            font-size: 13px;
+            color: var(--text-2);
+            letter-spacing: 2px;
+            font-weight: 600;
+            padding-left: 10px;
+            position: relative;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .recent-panel h3::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 13px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+            box-shadow: 0 0 6px var(--accent);
+        }
+        .recent-panel h3 .count {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-4);
+            letter-spacing: 1px;
+        }
+        #recentList { list-style: none; }
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 6px;
+            font-size: 12.5px;
+            color: var(--text-2);
+            border-bottom: 1px dashed rgba(64, 158, 255, 0.15);
+            border-radius: var(--radius-sm);
+            animation: rowIn 0.3s var(--ease);
+        }
+        .recent-item:last-child { border-bottom: none; }
+        .recent-item:hover { background: rgba(0, 150, 255, 0.08); }
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .recent-date {
+            color: var(--text-4);
+            flex: none;
+            font-variant-numeric: tabular-nums;
+        }
+        .recent-merchant {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .recent-amount {
+            color: var(--warn);
+            flex: none;
+            font-variant-numeric: tabular-nums;
+        }
+        .recent-del {
+            flex: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            color: #ff9a9a;
+            background: transparent;
+            border: 1px solid rgba(255, 120, 120, 0.45);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: color 0.2s var(--ease), background 0.2s var(--ease),
+                        border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+        }
+        .recent-del:hover {
+            color: #fff;
+            background: rgba(255, 80, 80, 0.25);
+            border-color: var(--danger);
+            box-shadow: 0 0 8px rgba(255, 90, 90, 0.35);
+        }
+        .recent-del:disabled { opacity: 0.5; cursor: not-allowed; }
+        .recent-del svg { width: 12px; height: 12px; flex: none; }
+        .recent-empty {
+            text-align: center;
+            color: var(--text-4);
+            font-size: 12px;
+            padding: 12px 0;
         }
 
         /* ============ 头部上传按钮 ============ */
         .upload-btn {
-            position: absolute;
-            right: 260px;
-            top: 50%;
-            transform: translateY(-50%);
+            position: relative;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 20px;
+            padding: 9px 18px;
             font-size: 14px;
             font-weight: 600;
-            letter-spacing: 2px;
-            color: #bfe6ff;
-            background: linear-gradient(135deg, rgba(0, 180, 255, 0.2), rgba(0, 100, 200, 0.25));
-            border: 1px solid rgba(0, 212, 255, 0.55);
-            border-radius: 4px;
+            font-family: inherit;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            color: var(--text-2);
+            background: linear-gradient(135deg, rgba(0, 180, 255, 0.18), rgba(0, 100, 200, 0.24));
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-md);
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: background 0.25s var(--ease), border-color 0.25s var(--ease),
+                        box-shadow 0.25s var(--ease), transform 0.15s var(--ease), color 0.25s var(--ease);
             box-shadow: 0 0 12px rgba(0, 212, 255, 0.15), inset 0 0 10px rgba(0, 212, 255, 0.08);
             overflow: hidden;
         }
         .upload-btn:hover {
             color: #ffffff;
-            background: linear-gradient(135deg, rgba(0, 180, 255, 0.45), rgba(0, 100, 200, 0.5));
-            border-color: #00d4ff;
-            box-shadow: 0 0 22px rgba(0, 212, 255, 0.5), inset 0 0 18px rgba(0, 212, 255, 0.2);
-            transform: translateY(-50%) translateY(-1px);
+            background: linear-gradient(135deg, rgba(0, 180, 255, 0.42), rgba(0, 100, 200, 0.5));
+            border-color: var(--accent);
+            box-shadow: 0 0 22px rgba(0, 212, 255, 0.45), inset 0 0 18px rgba(0, 212, 255, 0.18);
+            transform: translateY(-1px);
         }
         .upload-btn:active {
-            transform: translateY(-50%) translateY(1px);
+            transform: translateY(1px);
             box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 8px rgba(0, 212, 255, 0.15);
         }
         .upload-btn .icon {
             width: 16px;
             height: 16px;
-            display: inline-block;
+            flex: none;
+            transition: transform 0.25s var(--ease);
         }
+        .upload-btn:hover .icon { transform: translateY(-2px); }
         .upload-btn:disabled, .upload-btn.is-loading {
             cursor: not-allowed;
             opacity: 0.75;
@@ -238,8 +422,7 @@
             position: absolute;
             top: 0; left: -100%;
             width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            animation: none;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
         }
         .upload-btn.is-loading::after {
             animation: shimmer 1.4s infinite;
@@ -309,96 +492,71 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        .toast > svg { width: 16px; height: 16px; flex: none; }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* ============ 最近上传记录面板 ============ */
-        .recent-panel {
-            position: absolute;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            z-index: 3;
-            background: linear-gradient(180deg, rgba(16, 42, 88, 0.8), rgba(8, 20, 48, 0.85));
-            border: 1px solid rgba(64, 158, 255, 0.35);
-            box-shadow: inset 0 0 20px rgba(0, 120, 220, 0.1);
-            padding: 8px 12px 10px;
+        /* ============ 响应式 ============ */
+        @media (max-width: 1440px) {
+            header h1 { font-size: 26px; letter-spacing: 4px; }
         }
-        .recent-panel h3 {
-            font-size: 14px;
-            color: #9fd8ff;
-            letter-spacing: 2px;
-            font-weight: 600;
-            padding-left: 10px;
-            position: relative;
-            margin-bottom: 6px;
+        @media (max-width: 1200px) {
+            header h1 { font-size: 22px; letter-spacing: 3px; }
+            .show-time { font-size: 12px; }
+            .total-number { font-size: 44px; }
         }
-        .recent-panel h3::before {
-            content: "";
-            position: absolute;
-            left: 0; top: 50%;
-            transform: translateY(-50%);
-            width: 3px; height: 13px;
-            background: linear-gradient(180deg, #00d4ff, #1e6dff);
-            box-shadow: 0 0 6px #00d4ff;
+        @media (max-width: 1024px) {
+            html, body { overflow-y: auto; height: auto; }
+            header {
+                height: auto;
+                min-height: 64px;
+                grid-template-columns: 1fr auto;
+                padding: 10px 16px;
+                row-gap: 6px;
+            }
+            header h1 { grid-column: 1 / -1; grid-row: 1; font-size: 18px; letter-spacing: 1px; }
+            .header-left { grid-column: 1; grid-row: 2; }
+            .show-time { grid-column: 2; grid-row: 2; font-size: 12px; }
+            .mainbox {
+                height: auto;
+                grid-template-columns: 1fr;
+                padding: 8px 12px 16px;
+            }
+            .column.left, .column.right { grid-template-rows: 320px 320px; }
+            .column.center { min-height: 420px; order: -1; }
+            .total-number { font-size: 48px; }
         }
-        #recentList { list-style: none; }
-        .recent-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 5px 6px;
-            font-size: 12.5px;
-            color: #bfe6ff;
-            border-bottom: 1px dashed rgba(64, 158, 255, 0.15);
+        @media (max-width: 640px) {
+            header h1 { font-size: 16px; letter-spacing: 0; }
+            .upload-btn { padding: 8px 12px; font-size: 13px; }
+            .upload-btn .btn-text { display: none; }
+            .recent-panel { left: 8px; right: 8px; bottom: 8px; }
+            .recent-item { font-size: 12px; }
+            .recent-del span { display: none; }
+            .recent-del { padding: 4px 6px; }
+            .total-number { font-size: 38px; }
         }
-        .recent-item:last-child { border-bottom: none; }
-        .recent-item:hover { background: rgba(0, 150, 255, 0.08); }
-        .recent-date { color: #5a8fc0; flex: none; }
-        .recent-merchant {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .recent-amount { color: #ffd34e; flex: none; }
-        .recent-del {
-            flex: none;
-            padding: 2px 10px;
-            font-size: 12px;
-            color: #ff9a9a;
-            background: transparent;
-            border: 1px solid rgba(255, 120, 120, 0.45);
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .recent-del:hover {
-            color: #fff;
-            background: rgba(255, 80, 80, 0.25);
-            border-color: #ff7070;
-            box-shadow: 0 0 8px rgba(255, 90, 90, 0.35);
-        }
-        .recent-del:disabled { opacity: 0.5; cursor: not-allowed; }
-        .recent-empty {
-            text-align: center;
-            color: #5a8fc0;
-            font-size: 12px;
-            padding: 8px 0;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
     <!-- 头部 -->
     <header>
+        <div class="header-left">
+            <button id="uploadBtn" class="upload-btn" type="button" title="上传账单截图" aria-label="上传账单截图">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span class="btn-text">上传截图</span>
+            </button>
+            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
+        </div>
         <h1>吃土账单分析 · 数据大屏</h1>
-        <button id="uploadBtn" class="upload-btn" title="上传账单截图">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            上传截图
-        </button>
-        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
         <div class="show-time"></div>
     </header>
 
@@ -430,7 +588,7 @@
             </div>
             <!-- 最近上传记录 -->
             <div class="recent-panel">
-                <h3>最近上传记录</h3>
+                <h3>最近上传记录 <span class="count" id="recentCount"></span></h3>
                 <ul id="recentList"></ul>
             </div>
         </div>
@@ -481,6 +639,30 @@
             return Object.keys(dict || {}).reduce(function (s, k) { return s + dict[k]; }, 0);
         }
 
+        // 坐标轴数值格式化：过万显示"万"，避免标签过长被裁切
+        function formatAxisValue(v) {
+            if (v >= 10000) return (v / 10000).toFixed(1).replace(/\.0$/, '') + '万';
+            return String(v);
+        }
+
+        // 统一的坐标轴样式
+        var AXIS_STYLE = {
+            axisLine: { lineStyle: { color: '#2b5a8f' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#7fb8e6', fontSize: 11, margin: 8 },
+            splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)', type: 'dashed' } }
+        };
+
+        // 统一的 Tooltip 样式
+        var TOOLTIP_STYLE = {
+            backgroundColor: 'rgba(8, 20, 48, 0.94)',
+            borderColor: 'rgba(0, 212, 255, 0.35)',
+            borderWidth: 1,
+            padding: [8, 12],
+            textStyle: { color: '#e6f4ff', fontSize: 12 },
+            extraCssText: 'border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.45);'
+        };
+
         // 数字滚动动画
         function countUp(el, target, duration) {
             duration = duration || 1200;
@@ -496,13 +678,22 @@
 
         /* ================= Toast 辅助函数 ================= */
         var toastContainer = document.getElementById('toastContainer');
+        var TOAST_ICONS = {
+            info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+            success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+        };
+
         function showToast(message, type, duration, showSpinner) {
             type = type || 'info';
             duration = duration || 3000;
             var el = document.createElement('div');
             el.className = 'toast toast-' + type;
-            var spinnerHtml = showSpinner ? '<div class="toast-spinner"></div>' : '';
-            el.innerHTML = spinnerHtml + '<span>' + message + '</span>';
+            el.setAttribute('role', 'status');
+            var iconHtml = showSpinner
+                ? '<div class="toast-spinner"></div>'
+                : (TOAST_ICONS[type] || '');
+            el.innerHTML = iconHtml + '<span>' + message + '</span>';
             toastContainer.appendChild(el);
             var closed = false;
             function close() {
@@ -515,13 +706,27 @@
             return { close: close };
         }
 
-        /* ================= 统一渲染函数 ================= */
-        function renderAll(data) {
-            // 清除之前可能追加的 loading 层
+        /* ================= 图表遮罩（加载 / 错误 / 空状态） ================= */
+        function showOverlay(id, text, isError) {
+            var dom = document.getElementById(id);
+            var old = dom.querySelector('.loading');
+            if (old) old.remove();
+            var d = document.createElement('div');
+            d.className = 'loading' + (isError ? ' is-error' : '');
+            d.textContent = text;
+            dom.appendChild(d);
+        }
+
+        function clearOverlays() {
             ['barChart', 'lineChart', 'pieChart'].forEach(function (id) {
                 var dom = document.getElementById(id);
                 dom.querySelectorAll('.loading').forEach(function (n) { n.remove(); });
             });
+        }
+
+        /* ================= 统一渲染函数 ================= */
+        function renderAll(data) {
+            clearOverlays();
 
             var totals = CATEGORIES.map(function (c) {
                 return { name: c.name, value: Math.round(sumDict(data[c.key]) * 100) / 100, color: c.color };
@@ -529,24 +734,39 @@
 
             countUp(document.getElementById('totalNumber'), data.total_expense || 0);
 
+            // 分类金额全为 0 时给出空状态提示（图表仍渲染坐标系）
+            if (totals.every(function (t) { return t.value === 0; })) {
+                showOverlay('barChart', '暂无分类数据');
+                showOverlay('pieChart', '暂无分类数据');
+            }
+
             /* ---------- 左上：分类柱形图 ---------- */
             barChart.setOption({
-                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
-                    valueFormatter: function (v) { return v + ' 元'; } },
-                grid: { left: '8%', right: '6%', top: '12%', bottom: '10%' },
+                tooltip: Object.assign({ trigger: 'axis', axisPointer: { type: 'shadow' },
+                    valueFormatter: function (v) { return v + ' 元'; } }, TOOLTIP_STYLE),
+                grid: { left: 6, right: 16, top: 38, bottom: 4, containLabel: true },
                 xAxis: {
                     type: 'category',
                     data: totals.map(function (t) { return t.name; }),
-                    axisLine: { lineStyle: { color: '#2b5a8f' } },
+                    axisLine: AXIS_STYLE.axisLine,
                     axisTick: { show: false },
-                    axisLabel: { color: '#9fd8ff', fontSize: 14 }
+                    axisLabel: { color: '#bfe6ff', fontSize: 13, margin: 10 }
                 },
                 yAxis: {
                     type: 'value',
-                    name: '元',
-                    nameTextStyle: { color: '#5a8fc0' },
-                    splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
-                    axisLabel: { color: '#5a8fc0' }
+                    name: '金额 (元)',
+                    nameTextStyle: { color: '#5a8fc0', fontSize: 11, align: 'left' },
+                    nameGap: 12,
+                    splitNumber: 4,
+                    axisLine: { show: false },
+                    splitLine: AXIS_STYLE.splitLine,
+                    axisLabel: {
+                        show: true,
+                        color: '#7fb8e6',
+                        fontSize: 11,
+                        margin: 8,
+                        formatter: formatAxisValue
+                    }
                 },
                 series: [{
                     type: 'bar',
@@ -576,23 +796,35 @@
             var shortDates = dates.map(function (d) { return d.length >= 10 ? d.substring(5) : d; });
             var values = dates.map(function (d) { return Math.round(daily[d] * 100) / 100; });
 
+            if (dates.length === 0) showOverlay('lineChart', '暂无消费记录');
+
             lineChart.setOption({
-                tooltip: { trigger: 'axis',
-                    valueFormatter: function (v) { return v + ' 元'; } },
-                grid: { left: '9%', right: '5%', top: '14%', bottom: '12%' },
+                tooltip: Object.assign({ trigger: 'axis',
+                    valueFormatter: function (v) { return v + ' 元'; } }, TOOLTIP_STYLE),
+                grid: { left: 6, right: 18, top: 38, bottom: 4, containLabel: true },
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
                     data: shortDates,
-                    axisLine: { lineStyle: { color: '#2b5a8f' } },
-                    axisLabel: { color: '#5a8fc0', fontSize: 11, rotate: dates.length > 10 ? 35 : 0 }
+                    axisLine: AXIS_STYLE.axisLine,
+                    axisTick: { show: false },
+                    axisLabel: { color: '#7fb8e6', fontSize: 11, margin: 10, rotate: dates.length > 10 ? 35 : 0 }
                 },
                 yAxis: {
                     type: 'value',
-                    name: '元',
-                    nameTextStyle: { color: '#5a8fc0' },
-                    splitLine: { lineStyle: { color: 'rgba(64,158,255,0.12)' } },
-                    axisLabel: { color: '#5a8fc0' }
+                    name: '金额 (元)',
+                    nameTextStyle: { color: '#5a8fc0', fontSize: 11, align: 'left' },
+                    nameGap: 12,
+                    splitNumber: 4,
+                    axisLine: { show: false },
+                    splitLine: AXIS_STYLE.splitLine,
+                    axisLabel: {
+                        show: true,
+                        color: '#7fb8e6',
+                        fontSize: 11,
+                        margin: 8,
+                        formatter: formatAxisValue
+                    }
                 },
                 series: [{
                     type: 'line',
@@ -613,8 +845,8 @@
 
             /* ---------- 右下：消费占比环饼图 ---------- */
             pieChart.setOption({
-                tooltip: { trigger: 'item',
-                    formatter: function (p) { return p.name + '：' + p.value + ' 元 (' + p.percent + '%)'; } },
+                tooltip: Object.assign({ trigger: 'item',
+                    formatter: function (p) { return p.name + '：' + p.value + ' 元 (' + p.percent + '%)'; } }, TOOLTIP_STYLE),
                 legend: { bottom: '2%', left: 'center',
                     textStyle: { color: '#9fd8ff' }, itemWidth: 12, itemHeight: 12 },
                 color: totals.map(function (t) { return t.color; }),
@@ -647,13 +879,9 @@
                 })
                 .catch(function (err) {
                     document.getElementById('totalNumber').textContent = '0.00';
-                    var tip = '连接后端失败：请确认 app.py 已启动 (http://127.0.0.1:5000)';
+                    var tip = '连接后端失败，请确认 app.py 已启动';
                     ['barChart', 'lineChart', 'pieChart'].forEach(function (id) {
-                        var dom = document.getElementById(id);
-                        var d = document.createElement('div');
-                        d.className = 'loading';
-                        d.textContent = tip;
-                        dom.appendChild(d);
+                        showOverlay(id, tip, true);
                     });
                     console.error(err);
                     throw err;
@@ -670,28 +898,38 @@
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
+        var TRASH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+
         function fetchRecent() {
             return fetch('http://127.0.0.1:5000/api/recent')
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                     if (data.status !== 'success') return;
                     var ul = document.getElementById('recentList');
+                    var count = document.getElementById('recentCount');
                     if (!data.items || data.items.length === 0) {
-                        ul.innerHTML = '<li class="recent-empty">暂无记录</li>';
+                        count.textContent = '';
+                        ul.innerHTML = '<li class="recent-empty">暂无上传记录，点击左上方按钮上传账单截图</li>';
                         return;
                     }
+                    count.textContent = '共 ' + data.items.length + ' 条';
                     var html = '';
                     data.items.forEach(function (it) {
+                        var merchant = it.merchant || '未知商户';
                         html += '<li class="recent-item">'
                             + '<span class="recent-date">' + escapeHtml(it.date) + '</span>'
-                            + '<span class="recent-merchant" title="' + escapeHtml(it.merchant) + '">' + escapeHtml(it.merchant) + '</span>'
+                            + '<span class="recent-merchant" title="' + escapeHtml(merchant) + '">' + escapeHtml(merchant) + '</span>'
                             + '<span class="recent-amount">¥' + Number(it.amount).toFixed(2) + '</span>'
-                            + '<button class="recent-del" data-id="' + it.id + '">删除</button>'
+                            + '<button class="recent-del" data-id="' + it.id + '" title="删除这条记录" aria-label="删除这条记录">' + TRASH_ICON + '<span>删除</span></button>'
                             + '</li>';
                     });
                     ul.innerHTML = html;
                 })
-                .catch(function (err) { console.error(err); });
+                .catch(function (err) {
+                    document.getElementById('recentCount').textContent = '';
+                    document.getElementById('recentList').innerHTML = '<li class="recent-empty">记录加载失败</li>';
+                    console.error(err);
+                });
         }
 
         // 删除按钮（事件委托）
@@ -699,7 +937,8 @@
             var btn = e.target.closest('.recent-del');
             if (!btn || btn.disabled) return;
             btn.disabled = true;
-            btn.textContent = '删除中...';
+            var originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span>删除中...</span>';
 
             fetch('http://127.0.0.1:5000/api/bills/' + btn.dataset.id, { method: 'DELETE' })
                 .then(function (res) { return res.json(); })
@@ -712,7 +951,7 @@
                 .catch(function (err) {
                     showToast('删除失败：' + err.message, 'error', 3000);
                     btn.disabled = false;
-                    btn.textContent = '删除';
+                    btn.innerHTML = originalHTML;
                 });
         });
 
@@ -745,6 +984,8 @@
             // 按钮进入 loading 状态
             uploadBtn.classList.add('is-loading');
             uploadBtn.disabled = true;
+            var btnText = uploadBtn.querySelector('.btn-text');
+            btnText.textContent = '识别中...';
 
             // 显示"AI 正在提取账单数据"提示
             var loadingToast = showToast('AI 正在提取账单数据，请稍候...', 'info', 0, true);
@@ -771,6 +1012,7 @@
                 .then(function () {
                     uploadBtn.classList.remove('is-loading');
                     uploadBtn.disabled = false;
+                    btnText.textContent = '上传截图';
                 });
         });
 
