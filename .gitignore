@@ -1,0 +1,28 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ---- 密钥与本地配置（绝不提交）----
+.env
+test_LLM.py
+
+# ---- 数据库 ----
+*.db
+*.sqlite
+*.sqlite3
+
+# ---- 个人账单数据与图片 ----
+test.jpg
+bill.csv
+bill demo.csv
+
+# ---- IDE / 系统 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ---- 备份文件 ----
+index_backup_*.html

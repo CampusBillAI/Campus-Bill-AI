@@ -8,17 +8,21 @@ import re
 import sqlite3
 
 import requests
+from dotenv import load_dotenv
+
+# 读取同目录下的 .env（该文件已被 .gitignore 忽略，不会提交到 Git）
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 DB_FILE = 'bill.db'
 
-# ============ 大模型配置（与 test_LLM.py 保持一致）============
-API_KEY = "sk-edc122f9618f499f9e6d899bf19794fb"
-BASE_URL = "https://api.deepseek.com/v1"
-MODEL_NAME = "deepseek-flash"
-# =============================================================
+# ============ 大模型配置（从环境变量读取，密钥存放在 .env）============
+API_KEY = os.environ.get('API_KEY', '')
+BASE_URL = os.environ.get('BASE_URL', 'https://api.deepseek.com/v1')
+MODEL_NAME = os.environ.get('MODEL_NAME', 'deepseek-flash')
+# ====================================================================
 
 # 消费类型关键词（按商户名匹配）
 FOOD_KEYWORDS = ['餐', '饭', '食堂', '外卖', '奶茶', '超市']
@@ -71,6 +75,9 @@ def parse_json_content(content):
 
 def recognize_bill(image_base64, mime='image/jpeg'):
     """把图片发给大模型，返回 {交易时间, 交易金额, 商户名称} 字典"""
+    if not API_KEY:
+        raise RuntimeError('未配置 API_KEY，请在项目根目录的 .env 中设置 API_KEY=...')
+
     prompt = (
         "请识别这张账单截图，提取以下三个字段：\n"
         "1. 交易时间\n"
